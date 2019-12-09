@@ -9,29 +9,29 @@ const dishRouter = express.Router();
 dishRouter.use(body.json());
 
 dishRouter.route('/')
-// all will execute for all by defualt 
-// first this will be executed and then res and req will be passed
-
-
-// .all((req,res,next) =>{
-//     res.statusCode = 200;
-//     res.setHeader('Content-type','text/plain');
-//     // looks for additional function that match the requests
-//     next();
-// })
-
-
 
 // the modified res is passed here
 .get((req,res,next) =>{
     // res.end('Will send all the dishes to you, this is just a preview');
-    Dishes.find({})
-    .then((dishes) => {
-        res.statusCode = 200;
-        res.setHeader('Content-type',"application/json");
-        res.json(dishes);
+    Dishes.find({}).countDocuments()
+    .then((result) => {
+        if(result){
+            Dishes.find({})
+            .then((result) => {
+                res.statusCode = 200;
+                res.setHeader('Content-type',"application/json");
+                res.json('The dishes are : ' + result);
+            }, (err) => next(err));
+            
+        }
+        else{
+            res.statusCode = 200;
+            res.setHeader('Content-type',"application/json");
+            res.json('There are no dishes at the moment');
+        }
+
     }, (err) => next(err))
-        .catch((err) => next(err));
+    .catch((err) => next(err));
 })
 
 
