@@ -86,7 +86,6 @@ promoRouter.route('/:leaderId')
     var leaderId = req.params.leaderId;
     Leaders.deleteMany({_id : leaderId})
     .then((result) =>{
-    
         res.statusCode = 200;
         res.setHeader('Content-type','application/json');
         res.json('Deleted');
