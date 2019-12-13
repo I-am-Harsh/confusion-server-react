@@ -4,6 +4,7 @@ const body = require('body-parser');
 const mongoose = require('mongoose');
 const Dishes = require('../models/dishes');
 const dishRouter = express.Router();
+const auth = require('../auth');
 
 
 dishRouter.use(body.json());
@@ -12,17 +13,12 @@ dishRouter.route('/')
 
 // the modified res is passed here
 .get((req,res,next) =>{
-    // res.end('Will send all the dishes to you, this is just a preview');
-    Dishes.find({}).countDocuments()
+    Dishes.find({})
     .then((result) => {
-        if(result){
-            Dishes.find({})
-            .then((result) => {
-                res.statusCode = 200;
-                res.setHeader('Content-type',"application/json");
-                res.json('The dishes are : ' + result);
-            }, (err) => next(err));
-            
+        if(result.length){
+            res.statusCode = 200;
+            res.setHeader('Content-type',"application/json");
+            res.json(result);   
         }
         else{
             res.statusCode = 200;
@@ -35,25 +31,34 @@ dishRouter.route('/')
 })
 
 
-.post((req,res,next) =>{
+.post(auth.verifyUser, (req,res,next) =>{
     Dishes.create(req.body)
     .then((dish) =>{
         console.log(`Dishes created : ${req.body}`);
         res.statusCode = 200;
         res.setHeader('Content-type',"application/json");
         res.json(dish);
-    }, (err) => next(err))
-    .catch((err) => next(err))
+    })
+    .catch((err) => {
+        if(err.name === 'ValidationError'){
+            // res.write('There is something wrong');
+            res.json(err._message);
+        }
+        else{
+            res.json('There is something else wrong');
+            // res.json(err);
+        }
+    });
     
 })
 
-.put((req,res) =>{
+.put(auth.verifyUser, (req,res) =>{
     res.statusCode = 403;
     res.end(`The ${req.method} was executed.  This operation is not supported.`);
 })
 
-.delete((req, res, next) => {
-    Dishes.deleteOne({})
+.delete(auth.verifyUser, (req, res, next) => {
+    Dishes.deleteMany()
     .then((resp) => {
         res.statusCode = 200;
         res.setHeader('Content-Type', 'application/json');
@@ -71,7 +76,7 @@ dishRouter.route('/:dishId')
     
     Dishes.findById(req.params.dishId)
     .then((dish) =>{
-        console.log(`Dishes created : ${req.body}`);
+        console.log(`Dish : ${req.body}`);
         res.statusCode = 200;
         res.setHeader('Content-type',"application/json");
         res.json(dish);
@@ -79,12 +84,12 @@ dishRouter.route('/:dishId')
     .catch((err) => next(err))
 })
 
-.post((req,res) =>{
+.post(auth.verifyUser,(req,res) =>{
     res.statusCode = 403;
     res.end(`The ${req.method} was executed.  This operation is not supported. Dish id is ${req.params.dishId}`);
 })
 
-.put((req,res,next) =>{
+.put(auth.verifyUser, (req,res,next) =>{
     Dishes.findByIdAndUpdate(req.params.dishId,{
         $set : req.body
     }, 
@@ -99,7 +104,7 @@ dishRouter.route('/:dishId')
     .catch((err) => next(err))
 })
 
-.delete((req,res) =>{
+.delete(auth.verifyUser,(req,res) =>{
     
     Dishes.findByIdAndRemove(req.params.dishId)
     .then((dish) =>{
@@ -137,7 +142,7 @@ dishRouter.route('/:dishId/comments')
     .catch((err) => next(err))
 })
 
-.post((req, res, next) => {
+.post(auth.verifyUser,(req, res, next) => {
     Dishes.findById(req.params.dishId)
     .then((dish) => {
         if (dish != null) {
@@ -158,12 +163,12 @@ dishRouter.route('/:dishId/comments')
     .catch((err) => next(err));
 })
 
-.put((req,res,next) =>{
+.put(auth.verifyUser,(req,res,next) =>{
     res.statusCode = 403;
     res.end(`The ${req.method} was executed.  This operation is not supported. Dish id is ${req.params.dishId}`);
 })
 
-.delete((req, res, next) => {
+.delete(auth.verifyUser,(req, res, next) => {
     Dishes.findById(req.params.dishId)
     .then((dish) => {
         if (dish != null) {
@@ -209,12 +214,12 @@ dishRouter.route('/:dishId/comments/:commentId')
     }, (err) => next(err))
     .catch((err) => next(err));
 })
-.post((req, res, next) => {
+.post(auth.verifyUser,(req, res, next) => {
     res.statusCode = 403;
     res.end('POST operation not supported on /dishes/'+ req.params.dishId
         + '/comments/' + req.params.commentId);
 })
-.put((req, res, next) => {
+.put(auth.verifyUser,(req, res, next) => {
     Dishes.findById(req.params.dishId)
     .then((dish) => {
         if (dish != null && dish.comments.id(req.params.commentId) != null) {
@@ -244,7 +249,7 @@ dishRouter.route('/:dishId/comments/:commentId')
     }, (err) => next(err))
     .catch((err) => next(err));
 })
-.delete((req, res, next) => {
+.delete(auth.verifyUser,(req, res, next) => {
     Dishes.findById(req.params.dishId)
     .then((dish) => {
         if (dish != null && dish.comments.id(req.params.commentId) != null) {
