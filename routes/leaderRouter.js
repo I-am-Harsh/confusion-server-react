@@ -21,7 +21,7 @@ promoRouter.route('/')
 })
 
 
-.post(auth.verifyUser,(req,res) =>{
+.post(auth.verifyUser,auth.verifyAdmin,(req,res) =>{
     Leaders.create(req.body)
     .then((result) =>{
         res.statusCode = 200;
@@ -36,7 +36,7 @@ promoRouter.route('/')
     res.end(`This is a ${req.method} request`);
 })
 
-.delete(auth.verifyUser,(req,res) =>{
+.delete(auth.verifyUser,auth.verifyAdmin,(req,res) =>{
     Leaders.deleteMany({})
     .then((result) => {
         res.statusCode = 200;
@@ -66,7 +66,7 @@ promoRouter.route('/:leaderId')
 })
 
 
-.put(auth.verifyUser,(req,res) =>{
+.put(auth.verifyUser,auth.verifyAdmin,(req,res) =>{
     
     Leaders.findByIdAndUpdate(req.params.leaderId,{
         $set : req.body
@@ -82,7 +82,7 @@ promoRouter.route('/:leaderId')
     .catch((err) => next(err))
 })
 
-.delete(auth.verifyUser,(req,res,next) =>{
+.delete(auth.verifyUser,auth.verifyAdmin,(req,res,next) =>{
     var leaderId = req.params.leaderId;
     Leaders.deleteMany({_id : leaderId})
     .then((result) =>{

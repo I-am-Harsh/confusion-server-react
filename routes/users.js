@@ -8,8 +8,17 @@ var User = require('../models/user');
 
 router.use(bodyParser.json());
 
-router.get('/', function(req, res, next) {
-  res.send('respond with a resource');
+router.get('/',authenticate.verifyUser,authenticate.verifyAdmin ,function(req, res, next) {
+  User.find()
+  .then((result) => {
+    res.statusCode = 200;
+    res.setHeader('Content-type','application/json');
+    if(result.length){
+      res.send(result);
+      return;
+  }
+    res.json("There are no users at the moment");
+  })
 });
 
 router.post('/signup', (req, res, next) => {
@@ -54,6 +63,9 @@ router.post('/login', passport.authenticate('local'), (req, res) => {
   res.setHeader('Content-Type', 'application/json');
   res.json({success: true, token : token, status: 'You are successfully logged in!'});
 });
+
+
+
 router.get('/logout', (req, res,next) => {
   if (req.session) {
     req.session.destroy();
