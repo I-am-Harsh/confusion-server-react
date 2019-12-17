@@ -11,7 +11,7 @@ promoRouter.route('/')
 // var promoId = req.body.promoId
 
 .get((req,res,next) =>{
-    Promotions.find({})
+    Promotions.find()
     .then((result) => {
         res.statusCode = 200;
         res.setHeader('Content-type','application/json');
@@ -37,7 +37,7 @@ promoRouter.route('/')
 })
 
 .delete(auth.verifyUser,auth.verifyAdmin,(req,res,next) =>{
-    Promotions.deleteMany({})
+    Promotions.deleteMany()
     .then((result) => {
         res.statusCode = 200;
         res.setHeader('Content-type','application/json');
@@ -86,7 +86,7 @@ promoRouter.route('/:promoId')
 
 .delete(auth.verifyUser,auth.verifyAdmin,(req,res,next) =>{
     var promoId = req.params.promoId;
-    Promotions.deleteMany({_id : promoId})
+    Promotions.deleteOne({_id : promoId})
     .then((result) =>{
         res.statusCode = 200;
         res.setHeader('Content-type','application/json');

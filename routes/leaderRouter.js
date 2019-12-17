@@ -11,7 +11,7 @@ promoRouter.route('/')
 // var leaderId = req.body.leaderId
 
 .get((req,res,next) =>{
-    Leaders.find({})
+    Leaders.find()
     .then((result) => {   
         res.statusCode = 200;
         res.setHeader('Content-type','application/json');
@@ -37,7 +37,7 @@ promoRouter.route('/')
 })
 
 .delete(auth.verifyUser,auth.verifyAdmin,(req,res) =>{
-    Leaders.deleteMany({})
+    Leaders.deleteMany()
     .then((result) => {
         res.statusCode = 200;
         res.setHeader('Content-type','application/json');
@@ -84,7 +84,7 @@ promoRouter.route('/:leaderId')
 
 .delete(auth.verifyUser,auth.verifyAdmin,(req,res,next) =>{
     var leaderId = req.params.leaderId;
-    Leaders.deleteMany({_id : leaderId})
+    Leaders.deleteOne({_id : leaderId})
     .then((result) =>{
         res.statusCode = 200;
         res.setHeader('Content-type','application/json');

@@ -56,14 +56,8 @@ exports.verifyAdmin = (req,res,next) => {
 exports.verifyComment = (req, dish,next) => {
     
     var author = dish.comments.id(req.params.commentId).author
-    // console.log("req.user._id :", req.user._id)
-    // console.log("author :", author)
-    // console.log(author == req.user._id)
-    
 
     if(req.user._id.equals(author)){
-        // console.log("User ID : " + typeof req.user._id);
-        // console.log('author id: ' + typeof author);
         return true;
     }
     var err = new Error('Only the owner of the comment can perform this operation');
