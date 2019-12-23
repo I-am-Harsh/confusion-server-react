@@ -10,11 +10,13 @@ var authenticate = require('./auth');
 var config = require('./config');
 
 
+
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var dishRouter = require('./routes/dishRouter');
 var leaderRouter = require('./routes/leaderRouter');
 var promoRouter = require('./routes/promoRouter');
+var uploadRouter = require('./routes/uploadRoute');
 
 const mongoose = require('mongoose');
 const Dishes = require('./models/dishes');
@@ -55,6 +57,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/dishes', dishRouter);
 app.use('/leaders', leaderRouter);
 app.use('/promotions', promoRouter);
+app.use('/imageUpload',uploadRouter);
 
 
 
