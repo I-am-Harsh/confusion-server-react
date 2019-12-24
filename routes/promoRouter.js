@@ -2,15 +2,18 @@ const body = require('body-parser');
 const express = require('express');
 const promoRouter = express.Router();
 const auth = require('../auth');
-
+const cors = require('./cors');
 const Promotions = require('../models/promotions');
 
 promoRouter.use(body.json());
 
 promoRouter.route('/')
 // var promoId = req.body.promoId
+.options(cors.corsWithOptions, (req,res) => {
+    res.sendStatus = 200;
+})
 
-.get((req,res,next) =>{
+.get(cors.cors,(req,res,next) =>{
     Promotions.find()
     .then((result) => {
         res.statusCode = 200;
@@ -21,7 +24,7 @@ promoRouter.route('/')
 })
 
 
-.post(auth.verifyUser,auth.verifyAdmin,(req,res,next) =>{
+.post(cors.corsWithOptions, auth.verifyUser,auth.verifyAdmin,(req,res,next) =>{
     Promotions.create(req.body)
     .then((result) =>{
         res.statusCode = 200;
@@ -32,11 +35,11 @@ promoRouter.route('/')
 })
 
 
-.put(auth.verifyUser,(req,res) =>{
+.put(cors.corsWithOptions, auth.verifyUser,(req,res) =>{
     res.end(`This is a ${req.method} request`);
 })
 
-.delete(auth.verifyUser,auth.verifyAdmin,(req,res,next) =>{
+.delete(cors.corsWithOptions, auth.verifyUser,auth.verifyAdmin,(req,res,next) =>{
     Promotions.deleteMany()
     .then((result) => {
         res.statusCode = 200;
@@ -49,7 +52,11 @@ promoRouter.route('/')
 
 
 promoRouter.route('/:promoId')
-.get(auth.verifyUser,(req,res,next) =>{
+.options(cors.corsWithOptions, (req,res) => {
+    res.sendStatus = 200;
+})
+
+.get(cors.cors, auth.verifyUser,(req,res,next) =>{
     var promoId = req.params.promoId;
     Promotions.findById({_id : promoId})
     .then((result) =>{
@@ -62,13 +69,13 @@ promoRouter.route('/:promoId')
 })
 
 
-.post(auth.verifyUser,(req,res) =>{
+.post(cors.corsWithOptions, auth.verifyUser,(req,res) =>{
     res.write(`The ${req.method} was executed. The selected promo id is :  ${req.body.name} `);
     res.end(`The selected promo id is : ${req.params.promoId}`)
 })
 
 
-.put(auth.verifyUser,auth.verifyAdmin,(req,res,next) =>{
+.put(cors.corsWithOptions, auth.verifyUser,auth.verifyAdmin,(req,res,next) =>{
     
     Promotions.findByIdAndUpdate(req.params.promoId,{
         $set : req.body
@@ -84,7 +91,7 @@ promoRouter.route('/:promoId')
     .catch((err) => next(err))
 })
 
-.delete(auth.verifyUser,auth.verifyAdmin,(req,res,next) =>{
+.delete(cors.corsWithOptions, auth.verifyUser,auth.verifyAdmin,(req,res,next) =>{
     var promoId = req.params.promoId;
     Promotions.deleteOne({_id : promoId})
     .then((result) =>{

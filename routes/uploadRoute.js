@@ -4,6 +4,7 @@ const Dishes = require('../models/dishes');
 const uploadRouter = express.Router();
 const auth = require('../auth');
 const multer = require('multer');
+const cors = require('./cors');
 
 
 var storage = multer.diskStorage({
@@ -28,15 +29,18 @@ const upload = multer({ storage : storage, fileFilter : imageFilter});
 uploadRouter.use(body.json());
 
 uploadRouter.route('/')
+.options(cors.corsWithOptions, (req,res) => {
+    res.sendStatus = 200;
+})
 
 
-.get(auth.verifyUser,auth.verifyAdmin,(req,res) =>{
+.get(cors.cors, auth.verifyUser,auth.verifyAdmin,(req,res) =>{
     res.statusCode = 403;
     res.end(`The ${req.method} was executed.  This operation is not supported.`);
 })
 
 // imagFile is the name of the upload form field name
-.post(auth.verifyUser,auth.verifyAdmin, upload.single('imageFile'), (req,res) =>{
+.post(cors.corsWithOptions, auth.verifyUser,auth.verifyAdmin, upload.single('imageFile'), (req,res) =>{
     console.log(req.file);
     // console.log(req);
     res.statusCode = 200;
@@ -45,11 +49,11 @@ uploadRouter.route('/')
     
 })
 
-.put(auth.verifyUser,auth.verifyAdmin,(req,res) =>{
+.put(cors.corsWithOptions,auth.verifyUser,auth.verifyAdmin,(req,res) =>{
     res.statusCode = 403;
     res.end(`The ${req.method} was executed.  This operation is not supported.`);
 })
-.delete(auth.verifyUser,auth.verifyAdmin,(req,res) =>{
+.delete(cors.corsWithOptions, auth.verifyUser,auth.verifyAdmin,(req,res) =>{
     res.statusCode = 403;
     res.end(`The ${req.method} was executed.  This operation is not supported.`);
 })
