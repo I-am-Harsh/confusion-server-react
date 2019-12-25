@@ -9,10 +9,7 @@ var User = require('../models/user');
 
 router.use(bodyParser.json());
 
-router.get('/',options(cors.corsWithOptions, (req,res) => {
-  res.sendStatus = 200;
-})
-,cors.cors,authenticate.verifyUser,authenticate.verifyAdmin ,function(req, res, next) {
+router.get('/', cors.cors,authenticate.verifyUser,authenticate.verifyAdmin ,function(req, res, next) {
   User.find()
   .then((result) => {
     res.statusCode = 200;
@@ -25,10 +22,7 @@ router.get('/',options(cors.corsWithOptions, (req,res) => {
   })
 });
 
-router.post('/signup', options(cors.corsWithOptions, (req,res) => {
-  res.sendStatus = 200;
-})
-,cors.corsWithOptions,  (req, res, next) => {
+router.post('/signup', cors.corsWithOptions,  (req, res, next) => {
   User.register(new User({username: req.body.username}), 
     req.body.password, (err, user) => {
     if(err) {
@@ -63,10 +57,7 @@ router.post('/signup', options(cors.corsWithOptions, (req,res) => {
   });
 });
 
-router.post('/login', options(cors.corsWithOptions, (req,res) => {
-  res.sendStatus = 200;
-}),
-cors.corsWithOptions,  passport.authenticate('local'), (req, res) => {
+router.post('/login', cors.corsWithOptions,  passport.authenticate('local'), (req, res) => {
 
   var token = authenticate.getToken({_id : req.user._id});
   res.statusCode = 200;
@@ -76,10 +67,7 @@ cors.corsWithOptions,  passport.authenticate('local'), (req, res) => {
 
 
 
-router.get('/logout', options(cors.corsWithOptions, (req,res) => {
-  res.sendStatus = 200;
-}),
-cors.cors,(req, res,next) => {
+router.get('/logout', cors.cors,(req, res,next) => {
   if (req.session) {
     req.session.destroy();
     res.clearCookie('session-id');
@@ -91,6 +79,15 @@ cors.cors,(req, res,next) => {
     next(err);
   }
 });
+
+router.get('/facebook/token', passport.authenticate('facebook-token'), (req,res) => {
+  if(req.user){
+    var token = authenticate.getToken({_id : req.user._id});
+    res.statusCode = 200;
+    res.setHeader('Content-Type', 'application/json');
+    res.json({success: true, token : token, status: 'You are successfully logged in!'});
+  }
+})
 module.exports = router;
 
 
