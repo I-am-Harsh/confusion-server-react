@@ -54,7 +54,6 @@ dishRouter.route('/')
             // res.json(err);
         }
     });
-    
 })
 
 .put(cors.corsWithOptions, auth.verifyUser, (req,res) =>{
@@ -82,7 +81,6 @@ dishRouter.route('/:dishId')
 })
 
 .get(cors.cors,(req,res,next) =>{
-    
     Dishes.findById(req.params.dishId)
     .populate('comments.author')
     .then((dish) =>{
