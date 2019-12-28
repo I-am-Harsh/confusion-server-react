@@ -38,7 +38,6 @@ favRouter.route('/')
     userId = {}
     userId.userId = req.user.id
     userId.favDish = req.body.dishId
-
     Fav.findOne({userId : userId.userId}, (err, result) => {
         if(err) return console.log(err);
         var alreadyExist = false;
@@ -77,8 +76,7 @@ favRouter.route('/')
         else{
             console.log('DNE')
             Fav.create(userId, (err, result) => {
-                if(err){  
-                    console.log("Second : --->"+err);
+                if(err){
                     return res.json(err);
                 }
                 console.log(result);
@@ -86,12 +84,10 @@ favRouter.route('/')
                 result.dishes.push(req.body.dishId);
                 result.save((err, result) => {
                     if(err){  
-                        console.log("first : --->" + err);
                         return res.json(err);
                     }
                     console.log(result);
                     res.json(result);
-                    
                 });
             })
         }
@@ -105,13 +101,10 @@ favRouter.route('/')
 })
 
 .delete(cors.corsWithOptions, auth.verifyUser, (req,res) => {
-    // console.log( 'idd : '+req.body._id);
     Fav.deleteOne({userId : req.user._id})
     .then((result) => {
-        // console.log(result);
         res.statusCode = 200;
         res.setHeader('Content-type','application/json');
-        // console.log(result);
         res.json('All favs are deleted now');
     })
     .catch((err) => res.send(err));
