@@ -58,7 +58,8 @@ favRouter.route('/')
             }
             if(!alreadyExist){
                 console.log(req.body);
-                result.dishes.push(req.body.dishId);
+                for (const i in req.body.dishId){
+                result.dishes.push(req.body.dishId[i]);}
                 result.save((err, result) => {
                     if(err){  
                         console.log("first : --->" + err);
@@ -201,41 +202,46 @@ favRouter.route('/:dishId')
     Fav.findOne({userId : req.user._id}, (err, result) => {
         if(err) return res.json(err);
         var exists = false;
-        for (let index = 0; index < result.dishes.length; index++) {
-            const element = result.dishes[index];
-            if(element == req.params.dishId){
-                exists = true;
-                break
+        if(result){
+            for (let index = 0; index < result.dishes.length; index++) {
+                const element = result.dishes[index];
+                if(element == req.params.dishId){
+                    exists = true;
+                    break
+                }
             }
-        }
-        if(exists){
-            result.dishes.pull({_id : req.params.dishId});
-            result.save((err, result) => {
-                if(result.dishes.length == 0){
-                    Fav.deleteOne({userId : req.user._id}, (err, result) => {
-                        if(err) return res.status(500).send(err);
+            if(exists){
+                result.dishes.pull({_id : req.params.dishId});
+                result.save((err, result) => {
+                    if(err) return res.send(err);
+                    if(result.dishes.length == 0){
+                        Fav.deleteOne({userId : req.user._id}, (err, result) => {
+                            if(err) return res.status(500).send(err);
+                            res.statusCode = 200;
+                            res.setHeader('Content-type','plain/text');
+                            res.json('You have no favourites left');
+                        })
+                    }
+                    else{
                         res.statusCode = 200;
-                        res.setHeader('Content-type','plain/text');
-                        res.json('You have no favourites left');
-                    })
-                }
-                else{
-                    res.statusCode = 200;
-                    res.setHeader('Content-type','application/json');
-                    res.json(result);
-                }
-            })
+                        res.setHeader('Content-type','application/json');
+                        res.json(result);
+                    }
+                })
+            }
+            else{
+                res.statusCode = 404;
+                res.setHeader('Content-type','application/json');
+                res.json({status : "The dish is not in favs"});
+            }
         }
         else{
             res.statusCode = 404;
             res.setHeader('Content-type','application/json');
-            res.json({status : "The dish is not in favs"});
+            res.json({status : "You have no favs registered"});
         }
     })
 });
-
-
-
 
 module.exports = favRouter;
 
