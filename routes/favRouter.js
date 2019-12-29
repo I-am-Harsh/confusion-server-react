@@ -41,22 +41,29 @@ favRouter.route('/')
     Fav.findOne({userId : userId.userId}, (err, result) => {
         if(err) return console.log(err);
         var alreadyExist = false;
-        console.log(result);
+        console.log("User fav found : ",result);
         if(result){
-            // console.log(result);
+            // check if the dish exists in the db 
+            // the dish supplied is an array so check that as well
             console.log("exists : ", result.dishes.length)
             for (let index = 0; index < result.dishes.length; index++) {
+                var secondIndex = 0;
                 const element = result.dishes[index];
                 console.log("Element :" + element);
-                if(element == userId.favDish){
+                if(element == userId.favDish[secondIndex]){
                     alreadyExist = true;
                     console.log('found');
                     break
                 }
-                console.log('not found');
+                secondIndex++;
+                if(secondIndex == req.body.dishId.length){
+                    break;
+                }
             }
+            // if it doenst exist
             if(!alreadyExist){
-                console.log(req.body);
+                console.log("Passing this for push : ",req.body);
+                // console.log(typeof req.body.dishId)
                 for (const i in req.body.dishId){
                 result.dishes.push(req.body.dishId[i]);}
                 result.save((err, result) => {
@@ -64,30 +71,45 @@ favRouter.route('/')
                         console.log("first : --->" + err);
                         return res.json(err);
                     }
-                    res.json(result);
-                    
+                    Fav.findOne({userId : userId.userId})
+                    .populate('userId')
+                    .populate('dishes')
+                    .then((result) => {
+                        res.json(result);
+                    })
+                    .catch((err) => res.json(err));
                 });
             }
+            // if it does
             else {
                 console.log(req.body);
                 res.json('The dish is already in favourites')
             }
         }
+        // if the user document itself doesnt exist
         else{
             console.log('DNE')
+            // create the doc using the id
             Fav.create(userId, (err, result) => {
                 if(err){
                     return res.json(err);
                 }
                 console.log(result);
                 // remove dishId here
+                // created the doc and now push in array 
                 result.dishes.push(req.body.dishId);
                 result.save((err, result) => {
                     if(err){  
                         return res.json(err);
                     }
                     console.log(result);
-                    res.json(result);
+                    Fav.findOne({userId : userId.userId})
+                    .populate('userId')
+                    .populate('dishes')
+                    .then((result) => {
+                        res.json(result);
+                    })
+                    .catch((err) => res.json(err));
                 });
             })
         }
@@ -101,7 +123,7 @@ favRouter.route('/')
 })
 
 .delete(cors.corsWithOptions, auth.verifyUser, (req,res) => {
-    Fav.deleteOne({userId : req.user._id})
+    Fav.deleteOne({userId : req.user.id})
     .then((result) => {
         res.statusCode = 200;
         res.setHeader('Content-type','application/json');
@@ -117,10 +139,21 @@ favRouter.route('/:dishId')
     res.sendStatus = 200;
 })
 
-.get(cors.cors, auth.verifyUser, (req,res) => {
-    res.status(403);
-    res.send('lol why')
-
+.get(cors.cors, auth.verifyUser, (req,res,next) => {
+    Fav.findOne({userId : req.user._id})
+    .then((result) => {
+        if(!result){
+            res.statusCode = 200;
+            res.setHeader('Content-type','application/json');
+            res.json({exists : "false"})
+        }
+        else{
+            result.populate('dishes', (err, result) => {
+                if(err) return res.json(err);
+                res.json({exists : "true", Dish : result});
+            })
+        }
+    },(err) => next(err))
 })
 
 .post(cors.corsWithOptions, auth.verifyUser, (req,res,next) => {
@@ -152,8 +185,13 @@ favRouter.route('/:dishId')
                         console.log("first : --->" + err);
                         return res.json(err);
                     }
-                    res.json(result);
-                    
+                    Fav.findOne({userId : userId.userId})
+                    .populate('userId')
+                    .populate('dishes')
+                    .then((result) => {
+                        res.json(result);
+                    })
+                    .catch((err) => res.json(err));
                 });
             }
             else {
@@ -177,8 +215,13 @@ favRouter.route('/:dishId')
                         return res.json(err);
                     }
                     console.log(result);
-                    res.json(result);
-                    
+                    Fav.findOne({userId : userId.userId})
+                    .populate('userId')
+                    .populate('dishes')
+                    .then((result) => {
+                        res.json(result);
+                    })
+                    .catch((err) => res.json(err));
                 });
             })
         }
@@ -218,7 +261,13 @@ favRouter.route('/:dishId')
                     else{
                         res.statusCode = 200;
                         res.setHeader('Content-type','application/json');
-                        res.json(result);
+                        Fav.findOne({userId : userId.userId})
+                        .populate('userId')
+                        .populate('dishes')
+                        .then((result) => {
+                            res.json(result);
+                        })
+                        .catch((err) => res.json(err));
                     }
                 })
             }

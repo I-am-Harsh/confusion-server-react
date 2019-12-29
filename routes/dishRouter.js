@@ -17,7 +17,7 @@ dishRouter.route('/')
 })
 // the modified res is passed here
 .get( cors.cors, (req,res,next) =>{
-    Dishes.find({})
+    Dishes.find(req.query)
     .populate('comments.author')
     .then((result) => {
         if(result.length){
