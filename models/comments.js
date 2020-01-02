@@ -19,6 +19,10 @@ var commentSchema = new Schema({
     author:  {
         type: mongoose.Schema.Types.ObjectId,
         ref : 'User'
+    },
+    dish : {
+        type : mongoose.Schema.Types.ObjectId,
+        ref : 'Dish'
     }
 }, {
     timestamps: true
